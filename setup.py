@@ -9,7 +9,7 @@ setup(
     packages=['chexdump'],
     license='MIT License',
     python_requires='>=2.7',
-    long_description=open('README.txt').read(),
+    long_description=open('README.md').read(),
     classifiers=[
         'Intended Audience :: Developers',
         'Natural Language :: English',
