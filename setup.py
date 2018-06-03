@@ -5,7 +5,7 @@ setup(
     author='csm10495',
     author_email='csm10495@gmail.com',
     url='http://github.com/csm10495/chexdump',
-    version='0.2',
+    version='0.3',
     packages=['chexdump'],
     license='MIT License',
     python_requires='>=2.7',
