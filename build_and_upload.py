@@ -22,6 +22,9 @@ try:
 except:
     pass # doesn't exist
     
+
+caller('%s -m pip install twine' % sys.executable)
+
 os.chdir(THIS_FOLDER)
 caller('%s setup.py sdist' % sys.executable)
 
