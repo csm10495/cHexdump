@@ -4,7 +4,7 @@ setup(
     name='chexdump',
     author='csm10495',
     author_email='csm10495@gmail.com',
-    url='http://github.com/csm10495/chexdump'
+    url='http://github.com/csm10495/chexdump',
     version='0.1',
     packages=['chexdump'],
     license='MIT License',
