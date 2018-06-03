@@ -1,18 +1,46 @@
+'''
+Brief:
+    __init__.py - The main file of the cHexdump package
+
+Description:
+    cHexdump contains some functions for simple hexdump-like output
+
+Author(s):
+    Charles Machalow
+'''
 import math
 import six
 
-def hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLabelMinWidth=4, showIndexLabel=True, showAscii=True, itemsPerLine=16, itemsTillLineSplit=None, action='print'):
+def hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLabelMinWidth=4, showIndexLabel=True, showAscii=True, itemsPerLine=16, itemsTillLineSplit=None, action='return'):
     '''
-    sequence: thing to print
-    numItems: if not 0: the number of items to print. If 0, use len()
-    sequenceOffset: Offset to start printing in the sequence
-    indexLabelOffset: Offset to start the left side counter on
-    indexLabelMinWidth: Min width in characters for the index label
-    showIndexLabel:If True, show index label on left
-    showAscii: If True, give ascii printout on the right
-    itemsPerLine: Number of items per line
-    itemsTillLineSplit: Number of items till extra spacing on a given line. If None, use itemsPerLine / 2
-    action: If 'print' print the hexdump, if 'return' return a string of the printout 
+    Brief:
+        hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLabelMinWidth=4, showIndexLabel=True, showAscii=True, 
+            itemsPerLine=16, itemsTillLineSplit=None, action='return') -
+                Used to hexdump a particular sequence.
+
+    Description:
+        This function contains a bunch of args to help get the desired style
+
+    Argument(s):
+        sequence - (Required) - thing to print
+        numItems - (Optional; Defaults to 0) - if not 0: the number of items to print. If 0, use len()
+        sequenceOffset - (Optional; Defaults to 0) - Offset to start printing in the sequence
+        indexLabelOffset - (Optional; Defaults to 0) - Offset to start the left side counter on (for display only)
+        indexLabelMinWidth - (Optional; Defaults to 4) - Min width in characters for the index label
+        showIndexLabel - (Optional; Defaults to True) - If True, show index label on left
+        showAscii - (Optional; Defaults to True) - If True, give ascii printout on the right
+        itemsPerLine - (Optional; Defaults to 16) - Number of items per line
+        itemsTillLineSplit - (Optional; Defaults to None) - Number of items till extra spacing on a given line. If None, use itemsPerLine / 2
+        action - (Optional; Defaults to 'return') If 'print' print the hexdump, if 'return' return a string of the printout 
+
+    Return Value(s):
+        String or None
+
+    Related:
+        sideBySideHexdump()
+
+    Author(s):
+        Charles Machalow
     '''
     if numItems is 0:
         numItems = len(sequence)
@@ -54,6 +82,10 @@ def hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLab
             asciiTemplate = '%s' * numItemsForThisLine
             lineStr += asciiTemplate % tuple([chr(i) if (i < 127 and i > 31) else '.' for i in itemsForThisLine]) 
 
+            # Fill short lines
+            if numItemsForThisLine < itemsPerLine:
+                lineStr += ' ' * (itemsPerLine - numItemsForThisLine)
+
         lineStr += "\n"
 
         buildStr += lineStr
@@ -65,7 +97,35 @@ def hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLab
     else:
         raise NotImplementedError
 
-def sideBySideHexdump(a, b, itemsPerLine=8, itemsTillLineSplit=0, showAscii=True, action='print'):
+def sideBySideHexdump(a, b, itemsPerLine=8, itemsTillLineSplit=0, showAscii=True, action='return'):
+    '''
+    Brief:
+        sideBySideHexdump(a, b, itemsPerLine=8, itemsTillLineSplit=0, showAscii=True, action='return') -
+            Used to display a side-by-side hex dump of two sequences.
+
+    Description:
+        This function contains a bunch of args to help get the desired style
+
+    Argument(s):
+        a - (Required) - Left sequence
+        b - (Required) - right sequence
+        itemsPerLine - (Optional; Defaults to 8) - Number of items per line (per side)
+        itemsTillLineSplit - (Optional; Defaults to None) - Number of items till extra spacing on a given line. If None, use itemsPerLine / 2
+        showAscii - (Optional; Defaults to True) - If True, give ascii printout on the right        
+        action - (Optional; Defaults to 'return') If 'print' print the hexdump, if 'return' return a string of the printout 
+
+    Return Value(s):
+        String or None
+
+    Related:
+        hexdump()
+
+    Author(s):
+        Charles Machalow
+    '''
+    if len(a) != len(b):
+        raise ValueError("len(a) must be equal to len(b)!")
+
     left = hexdump(a, action='return', itemsPerLine=itemsPerLine, itemsTillLineSplit=itemsTillLineSplit, showAscii=showAscii).splitlines()
     right = hexdump(b, showIndexLabel=False, action='return', itemsPerLine=itemsPerLine, itemsTillLineSplit=itemsTillLineSplit, showAscii=showAscii).splitlines()
     buildStr = ''
@@ -74,7 +134,7 @@ def sideBySideHexdump(a, b, itemsPerLine=8, itemsTillLineSplit=0, showAscii=True
         r = right[idx]
         # when checking for a match, remove the index
         match = l.split(' ', 1)[1] == r
-        buildStr += "%s | %s | %s\n" % (left[idx], right[idx], 'OK' if match else 'BAD')
+        buildStr += "%s | %s | %s\n" % (left[idx], right[idx], '' if match else '!')
         
     if action == 'print':
         print (buildStr)
@@ -82,5 +142,3 @@ def sideBySideHexdump(a, b, itemsPerLine=8, itemsTillLineSplit=0, showAscii=True
         return buildStr
     else:
         raise NotImplementedError
-
-    
