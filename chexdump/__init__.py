@@ -9,13 +9,15 @@ Author(s):
     Charles Machalow
 '''
 import math
+import os
 import six
+import tempfile 
 
-def hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLabelMinWidth=4, showIndexLabel=True, showAscii=True, itemsPerLine=16, itemsTillLineSplit=None, action='return'):
+def hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLabelMinWidth=4, showIndexLabel=True, showAscii=True, itemsPerLine=16, itemsTillLineSplit=None, action='return', nonAsciiChar='.'):
     '''
     Brief:
         hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLabelMinWidth=4, showIndexLabel=True, showAscii=True, 
-            itemsPerLine=16, itemsTillLineSplit=None, action='return') -
+            itemsPerLine=16, itemsTillLineSplit=None, action='return', nonAsciiChar='.') -
                 Used to hexdump a particular sequence.
 
     Description:
@@ -31,7 +33,8 @@ def hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLab
         showAscii - (Optional; Defaults to True) - If True, give ascii printout on the right
         itemsPerLine - (Optional; Defaults to 16) - Number of items per line
         itemsTillLineSplit - (Optional; Defaults to None) - Number of items till extra spacing on a given line. If None, use itemsPerLine / 2
-        action - (Optional; Defaults to 'return') If 'print' print the hexdump, if 'return' return a string of the printout 
+        action - (Optional; Defaults to 'return') - If 'print' print the hexdump, if 'return' return a string of the printout, if 'scroll' page the test via more/less
+        nonAsciiChar - (Optional; Defaults to '.') - When printing ASCII dump on the right, use this char if the character is not displayable via normal ASCII
 
     Return Value(s):
         String or None
@@ -80,22 +83,52 @@ def hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLab
         if showAscii:
             lineStr = lineStr.ljust(offsetToAscii, ' ')
             asciiTemplate = '%s' * numItemsForThisLine
-            lineStr += asciiTemplate % tuple([chr(i) if (i < 127 and i > 31) else '.' for i in itemsForThisLine]) 
+            lineStr += asciiTemplate % tuple([chr(i) if (i < 127 and i > 31) else nonAsciiChar for i in itemsForThisLine]) 
 
             # Fill short lines
             if numItemsForThisLine < itemsPerLine:
                 lineStr += ' ' * (itemsPerLine - numItemsForThisLine)
 
-        lineStr += "\n"
-
+        lineStr += os.linesep
         buildStr += lineStr
 
     if action == 'print':
         print(buildStr)
     elif action == 'return':
         return buildStr
+    elif action == 'scroll':
+        scrollText(buildStr)
     else:
         raise NotImplementedError
+
+def scrollText(txt):
+    '''
+    Brief:
+        scrollText(text) - Can display text via a scrollable fashion
+
+    Description:
+        This function does differnt thing depending on the OS
+
+    Argument(s):
+        txt - (Required) - Text to page/scroll
+
+    Return Value(s):
+        None
+
+    Related:
+        hexdump()
+
+    Author(s):
+        Charles Machalow
+    '''
+    with tempfile.NamedTemporaryFile(delete=False) as f:
+        f.write(txt)
+        
+    if os.name == 'nt':
+        os.system('more < %s' % f.name)
+    else:
+        os.system('less < %s' % f.name)
+    os.remove(f.name)
 
 def sideBySideHexdump(a, b, itemsPerLine=8, itemsTillLineSplit=0, showAscii=True, action='return'):
     '''
@@ -140,5 +173,7 @@ def sideBySideHexdump(a, b, itemsPerLine=8, itemsTillLineSplit=0, showAscii=True
         print (buildStr)
     elif action == 'return':
         return buildStr
+    elif action == 'scroll':
+        scrollText(buildStr)
     else:
         raise NotImplementedError
