@@ -11,6 +11,7 @@ Author(s):
 import math
 import os
 import six
+import sys
 import tempfile 
 
 def hexdump(sequence, numItems=0, sequenceOffset=0, indexLabelOffset=0, indexLabelMinWidth=4, showIndexLabel=True, showAscii=True, itemsPerLine=16, itemsTillLineSplit=None, action='return', nonAsciiChar='.'):
@@ -177,3 +178,34 @@ def sideBySideHexdump(a, b, itemsPerLine=8, itemsTillLineSplit=0, showAscii=True
         scrollText(buildStr)
     else:
         raise NotImplementedError
+
+def hexdumpFromStdin(maxBytes=None):
+    '''
+    Brief:
+        hexdumpFromStdin(maxBytes=None) - Does a hexdump of stdin data
+
+    Description:
+        -
+
+    Argument(s):
+        maxBytes - (Optional; Defaults to None) - If given the max number of bytes to print
+
+    Return Value(s):
+        None
+
+    Related:
+        hexdump()
+
+    Author(s):
+        Charles Machalow
+    '''
+    if sys.version_info >= (3, 0):
+        source = sys.stdin.buffer
+    else:
+        if os.name == 'nt':
+            import msvcrt
+            msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+        source = sys.stdin
+
+    b = source.read(maxBytes)
+    print(hexdump(b))

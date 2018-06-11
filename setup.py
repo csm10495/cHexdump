@@ -5,7 +5,7 @@ setup(
     author='csm10495',
     author_email='csm10495@gmail.com',
     url='http://github.com/csm10495/chexdump',
-    version='0.5',
+    version='0.7',
     packages=['chexdump'],
     license='MIT License',
     python_requires='>=2.7',
@@ -27,4 +27,9 @@ setup(
     ],
     include_package_data = True,
     install_requires=['six'],
+    entry_points={
+        'console_scripts': [
+            'hexdump = hexdump.__init__:hexdumpFromStdin'
+        ]
+    },
 )
