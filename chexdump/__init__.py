@@ -207,5 +207,12 @@ def hexdumpFromStdin(maxBytes=None):
             msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
         source = sys.stdin
 
-    b = source.read(maxBytes)
+    if sys.version_info >= (3, 0) or maxBytes is not None:
+        b = source.read(maxBytes)
+    else:
+        b = source.read()
+
+    if sys.version_info < (3, 0):
+        b = bytearray(b)
+    
     print(hexdump(b))
